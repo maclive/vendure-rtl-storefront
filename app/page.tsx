@@ -5,6 +5,8 @@ import { gqlClient, GET_COLLECTIONS, GET_PRODUCTS } from '@/lib/vendure'
 import ProductCard from '@/components/product/ProductCard'
 import styles from './page.module.css'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'سوق إدكو — تسوق الأحدث بأفضل الأسعار',
   description: 'سوق إدكو — متجرك الإلكتروني للملابس والإلكترونيات والعطور. شحن سريع، أسعار منافسة، دفع آمن.',
