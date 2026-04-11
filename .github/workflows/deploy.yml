@@ -1,0 +1,66 @@
+name: Build & Deploy — سوق إدكو
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Build Next.js
+        env:
+          NEXT_PUBLIC_VENDURE_API: https://bramjlive.com/shop-api
+          NEXT_PUBLIC_SITE_URL: http://pandastore.bramjlive.com
+          NODE_OPTIONS: --max-old-space-size=2048
+          NEXT_TELEMETRY_DISABLED: 1
+        run: npm run build
+
+      - name: Build Docker image & push to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/souq-adko || (git clone https://github.com/${{ github.repository }} /opt/souq-adko && cd /opt/souq-adko)
+            git pull origin main
+
+            # Build image on server (small — just runs, no heavy compile)
+            docker build \
+              --build-arg NODE_OPTIONS="--max-old-space-size=512" \
+              -t souq-adko:latest \
+              .
+
+            # Blue/green swap
+            docker stop souq-adko-app 2>/dev/null || true
+            docker rm   souq-adko-app 2>/dev/null || true
+
+            docker run -d \
+              --name souq-adko-app \
+              --restart unless-stopped \
+              -p 3000:3000 \
+              -e NODE_ENV=production \
+              -e NODE_OPTIONS="--max-old-space-size=384" \
+              -e NEXT_TELEMETRY_DISABLED=1 \
+              -e NEXT_PUBLIC_VENDURE_API=https://bramjlive.com/shop-api \
+              -e NEXT_PUBLIC_SITE_URL=http://pandastore.bramjlive.com \
+              souq-adko:latest
+
+            # Clean up old images
+            docker image prune -f
+            echo "✅ Deploy complete"
