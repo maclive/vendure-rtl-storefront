@@ -5,7 +5,7 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'bramjlive.com' },
-      { protocol: 'https', hostname: 'bramjlive.com' },
+      { protocol: 'https', hostname: 'assets.wuiltstore.com' },
       { protocol: 'http',  hostname: 'localhost' },
     ],
     formats: ['image/avif', 'image/webp'],
