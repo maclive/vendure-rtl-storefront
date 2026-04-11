@@ -188,7 +188,14 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             {product.description && (
               <div className={styles.description}>
                 <h2>وصف المنتج</h2>
-                <p dangerouslySetInnerHTML={{ __html: product.description }} />
+                <div
+                  className={styles.descContent}
+                  dangerouslySetInnerHTML={{
+                    __html: product.description
+                      .replace(/<script[^>]*>.*?<\/script>/gi, '')
+                      .replace(/<style[^>]*>.*?<\/style>/gi, '')
+                  }}
+                />
               </div>
             )}
 

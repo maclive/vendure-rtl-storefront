@@ -53,12 +53,13 @@ export default function Header() {
           {/* Desktop Nav */}
           <nav className={styles.nav} aria-label="التنقل الرئيسي">
             <Link href="/" className={styles.navLink}>الرئيسية</Link>
-            {collections.slice(0, 4).map((c) => (
+            {collections.slice(0, 3).map((c) => (
               <Link key={c.id} href={`/collections/${c.slug}`} className={styles.navLink}>
                 {c.name}
               </Link>
             ))}
             <Link href="/collections" className={styles.navLink}>كل الأقسام</Link>
+            <Link href="/contact" className={styles.navLink}>تواصل معنا</Link>
           </nav>
 
           {/* Actions */}

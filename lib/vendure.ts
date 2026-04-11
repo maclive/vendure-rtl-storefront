@@ -1,11 +1,22 @@
 import { GraphQLClient } from 'graphql-request'
 
-const VENDURE_API = process.env.NEXT_PUBLIC_VENDURE_API || 'http://localhost:3000/shop-api'
+const VENDURE_API = process.env.NEXT_PUBLIC_VENDURE_API || 'https://bramjlive.com/shop-api'
 
 export const gqlClient = new GraphQLClient(VENDURE_API, {
   headers: { 'Content-Type': 'application/json' },
   credentials: 'include',
 })
+
+// Client with auth token for checkout operations
+export function getAuthClient(token?: string) {
+  return new GraphQLClient(VENDURE_API, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    credentials: 'include',
+  })
+}
 
 // ─── Queries ───────────────────────────────────────────────
 
@@ -23,7 +34,7 @@ export const GET_COLLECTIONS = `
 `
 
 export const GET_PRODUCTS = `
-  query GetProducts($collectionSlug: String, $take: Int, $skip: Int, $sort: ProductSortParameter) {
+  query GetProducts($take: Int, $skip: Int, $sort: ProductSortParameter) {
     products(options: {
       take: $take
       skip: $skip
@@ -89,7 +100,7 @@ export const SEARCH_PRODUCTS = `
   }
 `
 
-// ─── Mutations ─────────────────────────────────────────────
+// ─── Cart Mutations ─────────────────────────────────────────
 
 export const ADD_TO_CART = `
   mutation AddToCart($variantId: ID!, $quantity: Int!) {
@@ -105,7 +116,7 @@ export const ADD_TO_CART = `
           productVariant {
             id
             name
-            product { name featuredAsset { preview } }
+            product { name slug featuredAsset { preview } }
           }
         }
       }
@@ -156,15 +167,7 @@ export const ADJUST_QTY = `
   }
 `
 
-export const SET_SHIPPING_ADDRESS = `
-  mutation SetShippingAddress($input: CreateAddressInput!) {
-    setOrderShippingAddress(input: $input) {
-      __typename
-      ... on Order { id state }
-      ... on ErrorResult { errorCode message }
-    }
-  }
-`
+// ─── Checkout Mutations ────────────────────────────────────
 
 export const SET_CUSTOMER = `
   mutation SetCustomer($input: CreateCustomerInput!) {
@@ -173,6 +176,20 @@ export const SET_CUSTOMER = `
       ... on Order { id }
       ... on ErrorResult { errorCode message }
       ... on AlreadyLoggedInError { errorCode message }
+      ... on EmailAddressConflictError { errorCode message }
+      ... on NoActiveOrderError { errorCode message }
+      ... on GuestCheckoutError { errorCode message }
+    }
+  }
+`
+
+export const SET_SHIPPING_ADDRESS = `
+  mutation SetShippingAddress($input: CreateAddressInput!) {
+    setOrderShippingAddress(input: $input) {
+      __typename
+      ... on Order { id state }
+      ... on ErrorResult { errorCode message }
+      ... on NoActiveOrderError { errorCode message }
     }
   }
 `
@@ -194,15 +211,17 @@ export const SET_SHIPPING_METHOD = `
       __typename
       ... on Order { id shippingWithTax }
       ... on ErrorResult { errorCode message }
+      ... on OrderModificationError { errorCode message }
+      ... on NoActiveOrderError { errorCode message }
     }
   }
 `
 
-export const TRANSITION_TO_ARRANGING = `
-  mutation TransitionToArranging {
-    transitionOrderToState(state: "ArrangingPayment") {
+export const TRANSITION_ORDER = `
+  mutation TransitionOrder($state: String!) {
+    transitionOrderToState(state: $state) {
       __typename
-      ... on Order { id state }
+      ... on Order { id state code }
       ... on OrderStateTransitionError { errorCode message transitionError }
     }
   }
@@ -214,6 +233,12 @@ export const ADD_PAYMENT = `
       __typename
       ... on Order { id state code }
       ... on ErrorResult { errorCode message }
+      ... on OrderPaymentStateError { errorCode message }
+      ... on IneligiblePaymentMethodError { errorCode message eligibilityCheckerMessage }
+      ... on PaymentFailedError { errorCode message paymentErrorMessage }
+      ... on PaymentDeclinedError { errorCode message paymentErrorMessage }
+      ... on OrderStateTransitionError { errorCode message transitionError }
+      ... on NoActiveOrderError { errorCode message }
     }
   }
 `
@@ -226,4 +251,8 @@ export function formatPrice(value: number, currency = 'EGP') {
     currency,
     minimumFractionDigits: 0,
   }).format(value / 100)
+}
+
+export function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim()
 }

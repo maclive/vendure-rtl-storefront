@@ -149,7 +149,10 @@
   padding-top: 16px;
 }
 .description h2 { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
-.description p  { font-size: 14px; color: var(--c-muted); line-height: 1.8; }
+.descContent { font-size: 14px; color: var(--c-muted); line-height: 1.8; }
+.descContent p { margin-bottom: 8px; }
+.descContent ul, .descContent ol { padding-right: 20px; margin-bottom: 8px; }
+.descContent li { margin-bottom: 4px; }
 
 .trust {
   display: flex;

@@ -4,14 +4,9 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'bramjlive.com',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-      },
+      { protocol: 'https', hostname: 'bramjlive.com' },
+      { protocol: 'https', hostname: 'assets.wuiltstore.com' },
+      { protocol: 'http',  hostname: 'localhost' },
     ],
     formats: ['image/avif', 'image/webp'],
   },
