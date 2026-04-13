@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
+import Image from 'next/image'
 import { gqlClient, GET_COLLECTIONS, GET_PRODUCTS } from '@/lib/vendure'
 import ProductCard from '@/components/product/ProductCard'
+import HeroSlider from '@/components/layout/HeroSlider'
 import styles from './page.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -32,50 +33,19 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* ── Hero ── */}
-      <section className={styles.hero} aria-label="البانر الرئيسي">
-        <div className={styles.heroInner}>
-          <div className={styles.heroText}>
-            <span className={styles.heroLabel}>✦ وصل جديد لسوق إدكو</span>
-            <h1 className={styles.heroTitle}>
-              تسوق <em>الأحدث</em><br />بأفضل الأسعار
-            </h1>
-            <p className={styles.heroSub}>
-              ملابس، إلكترونيات، عطور وأكثر — شحن سريع لكل أنحاء مصر
-            </p>
-            <div className={styles.heroBtns}>
-              <Link href="/collections" className="btn-primary">تسوق الآن</Link>
-              <Link href="/search?q=عروض" className={styles.heroOutline}>اكتشف العروض</Link>
-            </div>
-          </div>
+      {/* Hero Slider */}
+      <HeroSlider />
 
-          <div className={styles.heroStats} aria-label="إحصائيات المتجر">
-            {[
-              { icon: '📦', num: '+10K', label: 'منتج متاح' },
-              { icon: '⚡', num: '24h',  label: 'توصيل سريع' },
-              { icon: '⭐', num: '4.9',  label: 'تقييم العملاء' },
-              { icon: '🔒', num: '100%', label: 'دفع آمن' },
-            ].map((s) => (
-              <div key={s.label} className={styles.statCard}>
-                <span className={styles.statIcon} aria-hidden="true">{s.icon}</span>
-                <strong className={styles.statNum}>{s.num}</strong>
-                <span className={styles.statLabel}>{s.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features Strip ── */}
-      <div className={styles.features} aria-label="مميزات التسوق">
+      {/* Features Strip */}
+      <div className={styles.features}>
         {[
-          { icon: '🚚', title: 'شحن مجاني', sub: 'للطلبات فوق 500 ج.م' },
+          { icon: '🚚', title: 'شحن مجاني', sub: 'للطلبات فوق 400 ج.م' },
           { icon: '↩️', title: 'إرجاع مجاني', sub: 'خلال 14 يوم' },
-          { icon: '🔒', title: 'دفع آمن 100%', sub: 'فيزا، ماستركارد، كاش' },
-          { icon: '🎧', title: 'دعم 24/7', sub: 'خدمة عملاء متاحة دائماً' },
+          { icon: '🔒', title: 'دفع آمن', sub: 'فيزا، كاش، فوري' },
+          { icon: '🎧', title: 'دعم 24/7', sub: '+201097090024' },
         ].map((f) => (
           <div key={f.title} className={styles.feature}>
-            <span className={styles.featureIcon} aria-hidden="true">{f.icon}</span>
+            <span className={styles.featureIcon}>{f.icon}</span>
             <div>
               <strong>{f.title}</strong>
               <span>{f.sub}</span>
@@ -84,45 +54,62 @@ export default async function HomePage() {
         ))}
       </div>
 
-      {/* ── Categories ── */}
+      {/* Categories */}
       {collections.length > 0 && (
-        <section className={styles.section} aria-labelledby="cats-title">
+        <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 id="cats-title" className="section-title">
-              تسوق حسب <span>الفئة</span>
-            </h2>
+            <div>
+              <p className={styles.sectionSub}>تصفح حسب</p>
+              <h2 className={styles.sectionTitle}>الأقسام <span>الرئيسية</span></h2>
+            </div>
             <Link href="/collections" className={styles.seeAll}>عرض الكل ←</Link>
           </div>
-
           <div className={styles.catsGrid}>
             {collections.map((col: any) => (
               <Link key={col.id} href={`/collections/${col.slug}`} className={styles.catCard}>
-                <div className={styles.catImg}>
+                <div className={styles.catImgWrap}>
                   {col.featuredAsset?.preview ? (
                     <Image
-                      src={`${col.featuredAsset.preview}?w=200&h=200`}
+                      src={`${col.featuredAsset.preview}?w=300&h=300`}
                       alt={col.name}
-                      width={200}
-                      height={200}
+                      width={300} height={300}
                       style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                     />
                   ) : (
-                    <span aria-hidden="true">🛍</span>
+                    <span className={styles.catEmoji}>🛍</span>
                   )}
+                  <div className={styles.catOverlay} />
                 </div>
-                <p className={styles.catName}>{col.name}</p>
+                <div className={styles.catLabel}>
+                  <span>{col.name}</span>
+                  <span className={styles.catArrow}>←</span>
+                </div>
               </Link>
             ))}
           </div>
         </section>
       )}
 
-      {/* ── Products ── */}
-      <section className={styles.section} aria-labelledby="products-title">
+      {/* Promo Banner */}
+      <div className={styles.promoBanner}>
+        <div className={styles.promoContent}>
+          <span className={styles.promoTag}>⚡ عرض محدود</span>
+          <h2>شحن مجاني على جميع الطلبات<em> فوق 400 ج.م</em></h2>
+          <p>استمتع بتجربة تسوق مريحة مع توصيل سريع لباب منزلك في إدكو وكل محافظات مصر</p>
+          <Link href="/collections" className={styles.promoCta}>تسوق الآن</Link>
+        </div>
+        <div className={styles.promoIcons}>
+          <span>🚚</span><span>📦</span><span>⭐</span>
+        </div>
+      </div>
+
+      {/* Products */}
+      <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2 id="products-title" className="section-title">
-            منتجات <span>مميزة</span>
-          </h2>
+          <div>
+            <p className={styles.sectionSub}>الأكثر مبيعاً</p>
+            <h2 className={styles.sectionTitle}>منتجات <span>مميزة</span></h2>
+          </div>
           <Link href="/collections" className={styles.seeAll}>عرض الكل ←</Link>
         </div>
 
@@ -134,21 +121,56 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className={styles.noProducts}>
-            <p>لا توجد منتجات حالياً، تفقد مرة أخرى قريباً!</p>
+            <span style={{ fontSize: 48 }}>🛍</span>
+            <p>لا توجد منتجات حالياً</p>
+            <Link href="/collections" className="btn-primary">تصفح الأقسام</Link>
           </div>
         )}
       </section>
 
-      {/* ── Promo Banner ── */}
-      <section className={styles.promoBanner} aria-label="عرض خاص">
-        <div className={styles.promoText}>
-          <h2>خصم حتى <em>50%</em> على الإلكترونيات</h2>
-          <p>عروض محدودة — انتهز الفرصة قبل نفاد الكمية</p>
+      {/* Why us */}
+      <section className={styles.whySection}>
+        <div className={styles.whyInner}>
+          <div className={styles.whyText}>
+            <p className={styles.sectionSub}>لماذا سوق إدكو؟</p>
+            <h2 className={styles.sectionTitle}>تسوق بثقة<br /><span>وراحة بال</span></h2>
+            <p className={styles.whySub}>نحن هنا في إدكو نقدم لك تجربة تسوق متكاملة بمنتجات أصيلة وأسعار منافسة وخدمة عملاء على مدار الساعة</p>
+            <Link href="/contact" className={styles.whyCta}>تواصل معنا</Link>
+          </div>
+          <div className={styles.whyCards}>
+            {[
+              { icon: '✅', title: 'منتجات أصيلة', desc: 'جميع منتجاتنا أصلية 100% مع ضمان الجودة' },
+              { icon: '💰', title: 'أسعار منافسة', desc: 'نضمن لك أفضل الأسعار في السوق المصري' },
+              { icon: '⚡', title: 'توصيل سريع', desc: 'نفس اليوم داخل إدكو و24-48 ساعة لباقي المحافظات' },
+              { icon: '🤝', title: 'خدمة متميزة', desc: 'فريق دعم متاح 7 أيام الأسبوع للمساعدة' },
+            ].map(w => (
+              <div key={w.title} className={styles.whyCard}>
+                <span className={styles.whyIcon}>{w.icon}</span>
+                <strong>{w.title}</strong>
+                <p>{w.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <Link href="/search?q=إلكترونيات" className="btn-primary">
-          تسوق العرض ←
-        </Link>
       </section>
+
+      {/* WhatsApp CTA */}
+      <div className={styles.whatsappCta}>
+        <div className={styles.whatsappInner}>
+          <div>
+            <h3>محتاج مساعدة في الاختيار؟</h3>
+            <p>تواصل معنا على واتساب وسنساعدك في إيجاد المنتج المناسب</p>
+          </div>
+          <a
+            href="https://wa.me/00201097090024"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.whatsappBtn}
+          >
+            💬 تواصل على واتساب
+          </a>
+        </div>
+      </div>
     </>
   )
 }

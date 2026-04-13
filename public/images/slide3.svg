@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">
+  <defs>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a0a00"/>
+      <stop offset="100%" style="stop-color:#0f0f0f"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#g3)"/>
+  <circle cx="850" cy="300" r="320" fill="#c9933a" opacity="0.06"/>
+  <!-- Perfume bottles -->
+  <g transform="translate(680,80)">
+    <!-- Big bottle -->
+    <rect x="60" y="60" width="80" height="160" rx="12" fill="#8B6914"/>
+    <rect x="70" y="40" width="60" height="30" rx="6" fill="#a07020"/>
+    <rect x="85" y="25" width="30" height="20" rx="4" fill="#c9933a"/>
+    <rect x="50" y="55" width="100" height="15" rx="3" fill="#c9933a" opacity="0.6"/>
+    <rect x="60" y="180" width="80" height="8" rx="2" fill="#c9933a" opacity="0.3"/>
+    <!-- Small bottle -->
+    <rect x="170" y="100" width="55" height="120" rx="10" fill="#6B4F0E"/>
+    <rect x="178" y="82" width="40" height="25" rx="5" fill="#8B6914"/>
+    <rect x="188" y="70" width="20" height="15" rx="3" fill="#c9933a" opacity="0.8"/>
+    <rect x="165" y="95" width="65" height="12" rx="2" fill="#c9933a" opacity="0.4"/>
+    <!-- Mini bottle -->
+    <rect x="240" y="130" width="40" height="90" rx="8" fill="#a07020"/>
+    <rect x="247" y="115" width="26" height="20" rx="4" fill="#c9933a" opacity="0.7"/>
+    <rect x="253" y="107" width="14" height="12" rx="2" fill="#c9933a" opacity="0.5"/>
+    <!-- Stars/sparkles -->
+    <circle cx="30" cy="80" r="3" fill="#c9933a" opacity="0.6"/>
+    <circle cx="320" cy="120" r="2" fill="#c9933a" opacity="0.4"/>
+    <circle cx="160" cy="280" r="4" fill="#c9933a" opacity="0.3"/>
+    <path d="M350,200 L355,185 L360,200 L375,205 L360,210 L355,225 L350,210 L335,205 Z" fill="#c9933a" opacity="0.4"/>
+  </g>
+</svg>

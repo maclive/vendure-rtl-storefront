@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">
+  <defs>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a1628"/>
+      <stop offset="100%" style="stop-color:#0f0f0f"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#g2)"/>
+  <circle cx="800" cy="200" r="400" fill="#1D9E75" opacity="0.06"/>
+  <!-- Electronics icons -->
+  <g transform="translate(700,100)">
+    <!-- Laptop -->
+    <rect x="30" y="80" width="200" height="130" rx="8" fill="#1a1a2e" stroke="#c9933a" stroke-width="1.5"/>
+    <rect x="40" y="90" width="180" height="110" rx="4" fill="#c9933a" opacity="0.12"/>
+    <rect x="10" y="210" width="240" height="12" rx="6" fill="#2a2a3e"/>
+    <!-- Headphones -->
+    <path d="M350,60 Q420,20 490,60" stroke="#c9933a" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <rect x="335" y="60" width="30" height="50" rx="15" fill="#c9933a" opacity="0.8"/>
+    <rect x="475" y="60" width="30" height="50" rx="15" fill="#c9933a" opacity="0.8"/>
+    <!-- Watch -->
+    <rect x="150" y="270" width="60" height="80" rx="12" fill="#1a1a1a" stroke="#c9933a" stroke-width="2"/>
+    <circle cx="180" cy="310" r="22" fill="#0a0a0a" stroke="#c9933a" stroke-width="1"/>
+    <line x1="180" y1="298" x2="180" y2="310" stroke="#c9933a" stroke-width="2"/>
+    <line x1="180" y1="310" x2="190" y2="316" stroke="#fff" stroke-width="1.5"/>
+    <rect x="168" y="350" width="24" height="8" rx="4" fill="#c9933a" opacity="0.5"/>
+    <rect x="168" y="262" width="24" height="8" rx="4" fill="#c9933a" opacity="0.5"/>
+  </g>
+  <circle cx="250" cy="200" r="3" fill="#1D9E75" opacity="0.5"/>
+  <circle cx="400" cy="450" r="2" fill="#c9933a" opacity="0.4"/>
+</svg>
