@@ -1,59 +1,70 @@
-import { GraphQLClient } from 'graphql-request'
-
+// ─── Vendure Client with Bearer Token ─────────────────────────────────────────
 const VENDURE_API = process.env.NEXT_PUBLIC_VENDURE_API || 'https://bramjlive.com/shop-api'
+const TOKEN_KEY = 'vendure_token'
 
-export const gqlClient = new GraphQLClient(VENDURE_API, {
-  headers: { 'Content-Type': 'application/json' },
-  credentials: 'include',
-})
+function getToken(): string | null {
+  if (typeof window === 'undefined') return null
+  try { return localStorage.getItem(TOKEN_KEY) } catch { return null }
+}
 
-// Client with auth token for checkout operations
-export function getAuthClient(token?: string) {
-  return new GraphQLClient(VENDURE_API, {
+function saveToken(token: string | null) {
+  if (typeof window === 'undefined' || !token) return
+  try { localStorage.setItem(TOKEN_KEY, token) } catch {}
+}
+
+export async function vendureFetch<T = any>(
+  query: string,
+  variables: Record<string, any> = {}
+): Promise<T> {
+  const token = getToken()
+
+  const res = await fetch(VENDURE_API, {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    credentials: 'include',
+    body: JSON.stringify({ query, variables }),
   })
+
+  // ── Read & save token from response header ──
+  const newToken =
+    res.headers.get('vendure-auth-token') ||
+    res.headers.get('Vendure-Auth-Token')
+  if (newToken) saveToken(newToken)
+
+  const json = await res.json()
+
+  if (json.errors?.length) {
+    throw new Error(json.errors[0]?.message || 'GraphQL Error')
+  }
+
+  return json.data as T
 }
 
-// ─── Queries ───────────────────────────────────────────────
+// Server-side only (no token needed)
+import { GraphQLClient } from 'graphql-request'
+export const gqlClient = new GraphQLClient(VENDURE_API, {
+  headers: { 'Content-Type': 'application/json' },
+})
 
+// ─── Queries ───────────────────────────────────────────────────────────────────
 export const GET_COLLECTIONS = `
   query GetCollections {
     collections(options: { topLevelOnly: true }) {
-      items {
-        id
-        name
-        slug
-        featuredAsset { preview }
-      }
+      items { id name slug featuredAsset { preview } }
     }
   }
 `
 
 export const GET_PRODUCTS = `
   query GetProducts($take: Int, $skip: Int, $sort: ProductSortParameter) {
-    products(options: {
-      take: $take
-      skip: $skip
-      sort: $sort
-      filter: { enabled: { eq: true } }
-    }) {
+    products(options: { take: $take skip: $skip sort: $sort filter: { enabled: { eq: true } } }) {
       totalItems
       items {
-        id
-        name
-        slug
-        description
+        id name slug description
         featuredAsset { preview }
-        variants {
-          id
-          price
-          currencyCode
-          stockLevel
-        }
+        variants { id price currencyCode stockLevel }
         collections { slug name }
       }
     }
@@ -63,20 +74,10 @@ export const GET_PRODUCTS = `
 export const GET_PRODUCT_BY_SLUG = `
   query GetProduct($slug: String!) {
     product(slug: $slug) {
-      id
-      name
-      slug
-      description
+      id name slug description
       featuredAsset { preview }
       assets { preview }
-      variants {
-        id
-        name
-        price
-        currencyCode
-        stockLevel
-        options { name groupId }
-      }
+      variants { id name price currencyCode stockLevel options { name groupId } }
       collections { slug name }
     }
   }
@@ -86,36 +87,27 @@ export const SEARCH_PRODUCTS = `
   query Search($term: String!) {
     search(input: { term: $term, take: 12, groupByProduct: true }) {
       items {
-        productId
-        productName
-        slug
+        productId productName slug
         productAsset { preview }
         priceWithTax {
           ... on SinglePrice { value }
           ... on PriceRange { min max }
         }
-        collectionIds
       }
     }
   }
 `
-
-// ─── Cart Mutations ─────────────────────────────────────────
 
 export const ADD_TO_CART = `
   mutation AddToCart($variantId: ID!, $quantity: Int!) {
     addItemToOrder(productVariantId: $variantId, quantity: $quantity) {
       __typename
       ... on Order {
-        id
-        totalWithTax
+        id totalWithTax
         lines {
-          id
-          quantity
-          linePriceWithTax
+          id quantity linePriceWithTax
           productVariant {
-            id
-            name
+            id name
             product { name slug featuredAsset { preview } }
           }
         }
@@ -128,18 +120,11 @@ export const ADD_TO_CART = `
 export const GET_ACTIVE_ORDER = `
   query GetOrder {
     activeOrder {
-      id
-      totalWithTax
-      subTotalWithTax
-      shippingWithTax
+      id totalWithTax subTotalWithTax shippingWithTax
       lines {
-        id
-        quantity
-        linePriceWithTax
+        id quantity linePriceWithTax
         productVariant {
-          id
-          name
-          price
+          id name price
           product { name slug featuredAsset { preview } }
         }
       }
@@ -167,18 +152,12 @@ export const ADJUST_QTY = `
   }
 `
 
-// ─── Checkout Mutations ────────────────────────────────────
-
 export const SET_CUSTOMER = `
   mutation SetCustomer($input: CreateCustomerInput!) {
     setCustomerForOrder(input: $input) {
       __typename
       ... on Order { id }
       ... on ErrorResult { errorCode message }
-      ... on AlreadyLoggedInError { errorCode message }
-      ... on EmailAddressConflictError { errorCode message }
-      ... on NoActiveOrderError { errorCode message }
-      ... on GuestCheckoutError { errorCode message }
     }
   }
 `
@@ -189,19 +168,13 @@ export const SET_SHIPPING_ADDRESS = `
       __typename
       ... on Order { id state }
       ... on ErrorResult { errorCode message }
-      ... on NoActiveOrderError { errorCode message }
     }
   }
 `
 
 export const GET_SHIPPING_METHODS = `
   query GetShippingMethods {
-    eligibleShippingMethods {
-      id
-      name
-      description
-      priceWithTax
-    }
+    eligibleShippingMethods { id name description priceWithTax }
   }
 `
 
@@ -211,8 +184,6 @@ export const SET_SHIPPING_METHOD = `
       __typename
       ... on Order { id shippingWithTax }
       ... on ErrorResult { errorCode message }
-      ... on OrderModificationError { errorCode message }
-      ... on NoActiveOrderError { errorCode message }
     }
   }
 `
@@ -233,8 +204,6 @@ export const ADD_PAYMENT = `
       __typename
       ... on Order { id state code }
       ... on ErrorResult { errorCode message }
-      ... on OrderPaymentStateError { errorCode message }
-      ... on IneligiblePaymentMethodError { errorCode message eligibilityCheckerMessage }
       ... on PaymentFailedError { errorCode message paymentErrorMessage }
       ... on PaymentDeclinedError { errorCode message paymentErrorMessage }
       ... on OrderStateTransitionError { errorCode message transitionError }
@@ -243,16 +212,8 @@ export const ADD_PAYMENT = `
   }
 `
 
-// ─── Helper ────────────────────────────────────────────────
-
 export function formatPrice(value: number, currency = 'EGP') {
   return new Intl.NumberFormat('ar-EG', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
+    style: 'currency', currency, minimumFractionDigits: 0,
   }).format(value / 100)
-}
-
-export function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').trim()
 }
