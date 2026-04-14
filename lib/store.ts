@@ -26,6 +26,7 @@ interface CartState {
   closeCart: () => void
   toggleCart: () => void
   itemCount: () => number
+  clearCart: () => void
 }
 
 export const useCart = create<CartState>()(
@@ -39,7 +40,17 @@ export const useCart = create<CartState>()(
       closeCart: () => set({ isOpen: false }),
       toggleCart: () => set((s) => ({ isOpen: !s.isOpen })),
       itemCount: () => get().lines.reduce((acc, l) => acc + l.quantity, 0),
+      clearCart: () => {
+        set({ lines: [], total: 0 })
+        // Clear token on cart clear so next purchase gets fresh session
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('vendure_token')
+        }
+      },
     }),
-    { name: 'souq-adko-cart', partialize: (s) => ({ lines: s.lines, total: s.total }) }
+    {
+      name: 'souq-adko-cart',
+      partialize: (s) => ({ lines: s.lines, total: s.total }),
+    }
   )
 )
